@@ -1,0 +1,14 @@
+{
+  "name": "lord-g3n-services",
+  "version": "1.0.0",
+  "description": "Discord bot for Lord G3N Services",
+  "main": "bot.py",
+  "scripts": {
+    "start": "python bot.py",
+    "install": "pip install -r requirements.txt",
+    "dev": "python bot.py"
+  },
+  "keywords": ["discord", "bot", "python"],
+  "author": "",
+  "license": "MIT"
+}
