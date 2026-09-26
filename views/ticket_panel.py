@@ -592,6 +592,7 @@ class PersistentTicketPanelView(discord.ui.View):
             discord.SelectOption(label="Purchase", description="Buy products or services", emoji="🛒", value="purchase"),
             discord.SelectOption(label="Report", description="Report users or issues", emoji="⚠️", value="report"),
             discord.SelectOption(label="Partnership", description="Partnership inquiries", emoji="🤝", value="partnership"),
+            discord.SelectOption(label="Support", description="General support and help", emoji="🛠️", value="support"),
         ],
         custom_id="persistent_ticket_type_select"
     )

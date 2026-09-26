@@ -147,7 +147,8 @@ class TicketService:
             "reward": "reward_ticket_category_id",
             "purchase": "purchase_ticket_category_id",
             "report": "report_ticket_category_id",
-            "partnership": "partnership_ticket_category_id"
+            "partnership": "partnership_ticket_category_id",
+            "support": "support_ticket_category_id"
         }
         key = category_map.get(ticket_type)
         if key:
