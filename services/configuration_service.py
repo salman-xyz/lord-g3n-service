@@ -1,3 +1,4 @@
+import discord
 from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy.orm import Session
 from database import Service, Setting, User, Code, Ticket, Log
