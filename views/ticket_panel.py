@@ -338,8 +338,6 @@ class TicketTypeSelect(discord.ui.Select):
     async def handle_support_ticket(self, interaction: discord.Interaction):
         user_id = interaction.user.id
         
-        await interaction.response.defer(ephemeral=True)
-        
         can_create, msg = self.ticket_service.can_create_ticket(user_id, interaction.guild)
         if not can_create:
             embed = discord.Embed(
