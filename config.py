@@ -84,6 +84,7 @@ DEFAULT_SETTINGS = {
     "auto_delete_delay": 5,
     "add_account_enabled": False,
     "add_account_staff_role_id": None,
+    "admin_role_id": None,
     "add_account_format": "{service}:{email}:{password}",
     "add_account_service": "",
     "add_account_category": "",

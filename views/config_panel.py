@@ -13,6 +13,16 @@ class SetStaffRoleButton(discord.ui.Button):
         await interaction.response.send_modal(modal)
 
 
+class SetAdminRoleButton(discord.ui.Button):
+    def __init__(self, config_service):
+        super().__init__(label="Set Admin Role", style=discord.ButtonStyle.danger, emoji="👑", row=0)
+        self.config_service = config_service
+    
+    async def callback(self, interaction: discord.Interaction):
+        modal = SetRoleModal(self.config_service, "admin_role_id", "Admin Role")
+        await interaction.response.send_modal(modal)
+
+
 class SetLogChannelButton(discord.ui.Button):
     def __init__(self, config_service):
         super().__init__(label="Set Log Channel", style=discord.ButtonStyle.primary, emoji="📋", row=0)
@@ -279,6 +289,7 @@ class ConfigPanelView(discord.ui.View):
     
     def add_ticket_settings(self):
         self.add_item(SetStaffRoleButton(self.config_service))
+        self.add_item(SetAdminRoleButton(self.config_service))
         self.add_item(SetLogChannelButton(self.config_service))
         self.add_item(SetPanelChannelButton(self.config_service))
         self.add_item(SetTicketGifButton(self.config_service))

@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from typing import Union
 
 from services.configuration_service import set_setting
 from services.code_generator import get_code_by_value, invalidate_code, get_code_stats
@@ -9,12 +10,34 @@ from services.logging_service import create_log_entry
 from database import get_session
 from database import Service
 
+
+def is_admin_or_has_role():
+    """Check if user has Administrator permission or the configured admin role."""
+    async def predicate(ctx):
+        # Always allow bot owner
+        if await ctx.bot.is_owner(ctx.author):
+            return True
+        # Allow Discord Administrator
+        if ctx.author.guild_permissions.administrator:
+            return True
+        # Check for configured admin role
+        admin_role_id = None
+        from services.configuration_service import get_setting
+        admin_role_id = get_setting(ctx.guild.id, 'admin_role_id')
+        if admin_role_id:
+            role = ctx.guild.get_role(int(admin_role_id))
+            if role and role in ctx.author.roles:
+                return True
+        return False
+    return commands.check(predicate)
+
+
 class AdminCog(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @commands.command(name='checkcode')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def checkcode_command(self, ctx, code_str: str):
         code = get_code_by_value(ctx.guild.id, code_str)
         if not code:
@@ -28,7 +51,7 @@ class AdminCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @commands.command(name='invalidatecode')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def invalidatecode_command(self, ctx, code_str: str):
         code = invalidate_code(ctx.guild.id, code_str)
         if not code:
@@ -39,7 +62,7 @@ class AdminCog(commands.Cog):
         create_log_entry(ctx.guild.id, 'Code Invalidated', staff_id=ctx.author.id, details=f"Code: {code_str}")
 
     @commands.command(name='stats')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def stats_command(self, ctx):
         user_stats = get_user_stats(ctx.guild.id)
         code_stats = get_code_stats(ctx.guild.id)
@@ -69,47 +92,47 @@ class AdminCog(commands.Cog):
         create_log_entry(ctx.guild.id, f'Setting Updated: {key}', staff_id=ctx.author.id, details=f"New value: {value}")
 
     @commands.command(name='setform')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setform_command(self, ctx, url: str):
         await self._set_and_confirm(ctx, 'google_form_url', url, "Google Form URL")
 
     @commands.command(name='setads')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setads_command(self, ctx, url: str):
         await self._set_and_confirm(ctx, 'ads_website_url', url, "Ads Website URL")
 
     @commands.command(name='setticketchannel')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setticketchannel_command(self, ctx, channel: discord.TextChannel):
         await self._set_and_confirm(ctx, 'ticket_panel_channel', str(channel.id), "Ticket Panel Channel")
 
     @commands.command(name='setstaffrole')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setstaffrole_command(self, ctx, role: discord.Role):
         await self._set_and_confirm(ctx, 'staff_role', str(role.id), "Staff Role")
 
     @commands.command(name='setredeemcategory')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setredeemcategory_command(self, ctx, category: discord.CategoryChannel):
         await self._set_and_confirm(ctx, 'redeem_ticket_category', str(category.id), "Redeem Ticket Category")
 
     @commands.command(name='setrewardcategory')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setrewardcategory_command(self, ctx, category: discord.CategoryChannel):
         await self._set_and_confirm(ctx, 'reward_ticket_category', str(category.id), "Reward Ticket Category")
 
     @commands.command(name='setsupportcategory')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setsupportcategory_command(self, ctx, category: discord.CategoryChannel):
         await self._set_and_confirm(ctx, 'support_ticket_category', str(category.id), "Support Ticket Category")
 
     @commands.command(name='setlogchannel')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setlogchannel_command(self, ctx, channel: discord.TextChannel):
         await self._set_and_confirm(ctx, 'ticket_log_channel', str(channel.id), "Log Channel")
 
     @commands.command(name='setmaxactive')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setmaxactive_command(self, ctx, count: int):
         if count < 1:
             await ctx.send("❌ Must be at least 1")
@@ -117,7 +140,7 @@ class AdminCog(commands.Cog):
         await self._set_and_confirm(ctx, 'max_active_tickets', str(count), "Max Active Tickets")
 
     @commands.command(name='cleanstale')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def cleanstale_command(self, ctx, member: discord.Member = None):
         """Clean up tickets for deleted channels"""
         from database import get_db, Ticket
@@ -149,7 +172,7 @@ class AdminCog(commands.Cog):
             db.close()
 
     @commands.command(name='forceclose')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def forceclose_command(self, ctx, member: discord.Member):
         """Force close all open tickets for a user"""
         from database import get_db, Ticket
@@ -176,7 +199,7 @@ class AdminCog(commands.Cog):
             db.close()
 
     @commands.command(name='setavatar')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setavatar_command(self, ctx, url: str = None):
         """Set bot avatar/profile pic (supports animated GIF and Image). Usage: !setavatar <url> or attach file"""
         import aiohttp
@@ -237,7 +260,7 @@ class AdminCog(commands.Cog):
             await ctx.send(f"❌ Failed to update avatar: {e}\n*(Note: Discord limits avatar changes to a few times per hour)*")
 
     @commands.command(name='setbotname')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setbotname_command(self, ctx, *, new_name: str):
         """Set bot username. Usage: !setbotname <name>"""
         try:
@@ -247,7 +270,7 @@ class AdminCog(commands.Cog):
             await ctx.send(f"❌ Failed to change username: {e}")
 
     @commands.command(name='setgenbanner', aliases=['setgengif', 'genbanner'])
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setgenbanner_command(self, ctx, url: str = None):
         """Set the banner/GIF for generator !gen embeds. Usage: !setgenbanner <url> or attach image/gif"""
         banner_url = None
@@ -270,7 +293,7 @@ class AdminCog(commands.Cog):
         create_log_entry(ctx.guild.id, 'Setting Updated: gen_gif_url', staff_id=ctx.author.id, details=f"New banner: {banner_url}")
 
     @commands.command(name='setticketbanner', aliases=['setticketgif', 'ticketbanner'])
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setticketbanner_command(self, ctx, url: str = None):
         """Set the banner/GIF for !ticketpanels embed. Usage: !setticketbanner <url> or attach image/gif"""
         banner_url = None
@@ -293,7 +316,7 @@ class AdminCog(commands.Cog):
         create_log_entry(ctx.guild.id, 'Setting Updated: ticket_gif_url', staff_id=ctx.author.id, details=f"New banner: {banner_url}")
 
     @commands.command(name='setstockbanner', aliases=['setstockthumbnail'])
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def setstockbanner_command(self, ctx, url: str = None):
         """Set the thumbnail/banner for !stock command. Usage: !setstockbanner <url> or attach image/gif"""
         banner_url = None
