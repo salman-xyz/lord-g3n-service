@@ -59,7 +59,7 @@ class SetRewardCategoryButton(discord.ui.Button):
         self.config_service = config_service
     
     async def callback(self, interaction: discord.Interaction):
-        modal = SetChannelModal(self.config_service, "rewards_ticket_category_id", "Rewards Category")
+        modal = SetChannelModal(self.config_service, "reward_ticket_category_id", "Rewards Category")
         await interaction.response.send_modal(modal)
 
 
