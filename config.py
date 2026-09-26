@@ -190,6 +190,7 @@ TICKET_TYPES = {
     "purchase": {"emoji": "🛒", "label": "Purchase", "description": "Buy products/services"},
     "report": {"emoji": "⚠️", "label": "Report", "description": "Report issues or users"},
     "partnership": {"emoji": "🤝", "label": "Partnership", "description": "Open a Ticket for Partnership with us"},
+    "support": {"emoji": "🛠️", "label": "Support", "description": "General support and help"},
 }
 
 CODE_STATUSES = ["unused", "activated", "redeemed", "expired", "invalidated"]

@@ -68,6 +68,8 @@ class TicketTypeSelect(discord.ui.Select):
             await self.handle_report_ticket(interaction)
         elif ticket_type == "partnership":
             await self.handle_partnership_ticket(interaction)
+        elif ticket_type == "support":
+            await self.handle_support_ticket(interaction)
     
     async def handle_redeem_ticket(self, interaction: discord.Interaction):
         user_id = interaction.user.id
