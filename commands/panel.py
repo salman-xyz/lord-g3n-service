@@ -11,6 +11,7 @@ from services.configuration_service import ConfigurationService
 from services.ticket_service import TicketService
 from services.verification_service import VerificationService
 from services.configuration_service import get_setting, is_enabled, get_int_setting
+from commands.admin import is_admin_or_has_role
 
 class PanelCog(commands.Cog):
     def __init__(self, bot):
@@ -19,7 +20,7 @@ class PanelCog(commands.Cog):
         self._message_cache = {}  # {(guild_id, user_id): [messages]}
     
     @commands.command(name='panel')
-    @commands.has_permissions(administrator=True)
+    @is_admin_or_has_role()
     async def panel_command(self, ctx):
         embed = build_main_panel_embed(ctx.guild.id)
         db = next(get_db())
