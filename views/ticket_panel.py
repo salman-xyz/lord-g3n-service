@@ -60,16 +60,20 @@ class TicketTypeSelect(discord.ui.Select):
         
         if ticket_type == "redeem":
             await self.handle_redeem_ticket(interaction)
-        elif ticket_type == "reward":
-            await self.handle_reward_ticket(interaction)
-        elif ticket_type == "purchase":
-            await self.handle_purchase_ticket(interaction)
-        elif ticket_type == "report":
-            await self.handle_report_ticket(interaction)
-        elif ticket_type == "partnership":
-            await self.handle_partnership_ticket(interaction)
-        elif ticket_type == "support":
-            await self.handle_support_ticket(interaction)
+        else:
+            # Defer immediately for other types to avoid timeout
+            await interaction.response.defer(ephemeral=True)
+            
+            if ticket_type == "reward":
+                await self.handle_reward_ticket(interaction)
+            elif ticket_type == "purchase":
+                await self.handle_purchase_ticket(interaction)
+            elif ticket_type == "report":
+                await self.handle_report_ticket(interaction)
+            elif ticket_type == "partnership":
+                await self.handle_partnership_ticket(interaction)
+            elif ticket_type == "support":
+                await self.handle_support_ticket(interaction)
     
     async def handle_redeem_ticket(self, interaction: discord.Interaction):
         user_id = interaction.user.id
@@ -466,8 +470,6 @@ class TicketTypeSelect(discord.ui.Select):
     
     async def _create_generic_ticket(self, interaction: discord.Interaction, ticket_type: str, display_name: str, service: str, color: int):
         user_id = interaction.user.id
-        
-        await interaction.response.defer(ephemeral=True)
         
         can_create, msg = self.ticket_service.can_create_ticket(user_id, interaction.guild)
         if not can_create:
