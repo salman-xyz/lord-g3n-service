@@ -1,5 +1,5 @@
 import discord
-from typing import Optional, List
+from typing import Optional, List, Any
 from sqlalchemy.orm import Session
 from database import Ticket, Code, User, Log, Setting
 from config import TICKET_TYPES, MAX_ACTIVE_TICKETS
