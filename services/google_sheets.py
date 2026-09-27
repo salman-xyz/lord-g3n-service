@@ -12,7 +12,7 @@ from database import VerificationSubmission, User, Log
 from config import GOOGLE_CREDENTIALS_FILE, GOOGLE_SHEET_ID, GOOGLE_SHEET_NAME, VERIFICATION_SYNC_INTERVAL
 
 class GoogleSheetsService:
-    REQUIRED_HEADERS = ["Timestamp", "Discord Username"]
+    REQUIRED_HEADERS = ["Timestamp", "Discord Username", "Discord User ID"]
     
     def __init__(self, db: Session, guild_id: int, guild=None):
         self.db = db
@@ -187,16 +187,14 @@ class GoogleSheetsService:
                 self.db.add(submission)
                 self.db.commit()
                 return "invalid"
-        elif username and self.guild:
-            # Try to find user by username in the guild
-            member = discord.utils.get(self.guild.members, name=username)
-            if member:
-                discord_id = member.id
-            else:
-                # Try with display name too
-                member = discord.utils.get(self.guild.members, display_name=username)
-                if member:
+        
+        # If no valid Discord User ID, try username matching (case-insensitive)
+        if not discord_id and username and self.guild:
+            username_lower = username.lower().strip()
+            for member in self.guild.members:
+                if member.name.lower() == username_lower or (member.display_name and member.display_name.lower() == username_lower):
                     discord_id = member.id
+                    break
         
         if not discord_id:
             submission = VerificationSubmission(
